@@ -24,6 +24,8 @@
 
 ## Description
 
+[WIP] Nest task management api following a tutorial. 
+
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
