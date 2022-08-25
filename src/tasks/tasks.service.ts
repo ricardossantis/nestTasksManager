@@ -12,23 +12,11 @@ export class TasksService {
     @InjectRepository(TasksRepository)
     private tasksRepository: TasksRepository,
   ) {}
-  // getAllTasks(): Task[] {
-  //   return this.tasks;
-  // }
-  // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
-  //   const { status, search } = filterDto;
-  //   let tasks = this.getAllTasks();
-  //   if (status) {
-  //     tasks = tasks.filter((task) => task.status === status);
-  //   }
-  //   if (search) {
-  //     tasks = tasks.filter(
-  //       (task) =>
-  //         task.title.includes(search) || task.description.includes(search),
-  //     );
-  //   }
-  //   return tasks;
-  // }
+
+  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+    return this.tasksRepository.getTasks(filterDto);
+  }
+
   createTask(taskDto: CreateTaskDto): Promise<Task> {
     return this.tasksRepository.createTask(taskDto);
   }
@@ -40,14 +28,23 @@ export class TasksService {
     }
     return found;
   }
-  // deleteTask(id: string): string {
-  //   const found = this.getTaskById(id);
-  //   this.tasks = this.tasks.filter((task) => task.id !== found.id);
-  //   return `Task with id ${id} was deleted`;
-  // }
-  // updateTask(id: string, status: TaskStatus): Task {
-  //   const task = this.getTaskById(id);
-  //   task.status = status;
-  //   return task;
-  // }
+
+  async deleteTask(id: string): Promise<string> {
+    const result = await this.tasksRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
+
+    return `Task with id ${id} was deleted`;
+  }
+
+  async updateTask(id: string, status: TaskStatus): Promise<Task> {
+    const task = await this.getTaskById(id);
+
+    task.status = status;
+    await this.tasksRepository.save(task);
+
+    return task;
+  }
 }
