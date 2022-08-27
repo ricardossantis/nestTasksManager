@@ -3,15 +3,17 @@ import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { TaskStatus } from './tasksStatus.enum';
 import { GetTasksFilterDto } from './dto/getTasksFilter.dto';
+import { User } from '../auth/user.entity';
 
 @EntityRepository(Task)
 export class TasksRepository extends Repository<Task> {
-  async createTask(CreateTaskDto: CreateTaskDto): Promise<Task> {
+  async createTask(CreateTaskDto: CreateTaskDto, user: User): Promise<Task> {
     const { title, description } = CreateTaskDto;
     const task = this.create({
       title,
       description,
       status: TaskStatus.OPEN,
+      user,
     });
 
     await this.save(task);
