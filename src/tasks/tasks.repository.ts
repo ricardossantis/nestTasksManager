@@ -4,6 +4,7 @@ import { CreateTaskDto } from './dto/createTask.dto';
 import { TaskStatus } from './tasksStatus.enum';
 import { GetTasksFilterDto } from './dto/getTasksFilter.dto';
 import { User } from '../auth/user.entity';
+import { QueryExpressionMap } from 'typeorm/query-builder/QueryExpressionMap';
 
 @EntityRepository(Task)
 export class TasksRepository extends Repository<Task> {
@@ -20,9 +21,10 @@ export class TasksRepository extends Repository<Task> {
     return task;
   }
 
-  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+  async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const { status, search } = filterDto;
     const query = await this.createQueryBuilder('task');
+    query.where({ user });
 
     if (status) {
       query.andWhere('task.status = :status', { status: 'OPEN' });
@@ -30,7 +32,7 @@ export class TasksRepository extends Repository<Task> {
 
     if (search) {
       query.andWhere(
-        'LOWER(task.title) LIKE LOWER(:search) or LOWER(task.description) LIKE LOWER(:description)',
+        '(LOWER(task.title) LIKE LOWER(:search) or LOWER(task.description) LIKE LOWER(:description))',
         { search: `%${search}%` },
       );
     }
